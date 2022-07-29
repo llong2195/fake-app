@@ -23,10 +23,10 @@ export class AllExceptionFilter implements ExceptionFilter {
 
     if (exception instanceof HttpException) {
       // responseBody = exception.getResponse()
-      statusCode = exception.getStatus()
       statusCode = HttpStatus.BAD_REQUEST
+      statusCode = exception.getStatus()
       responseBody = {
-        statusCode: statusCode,
+        // statusCode: statusCode,
         message:
           typeof exception.getResponse() == 'string'
             ? exception.getResponse()
@@ -35,12 +35,13 @@ export class AllExceptionFilter implements ExceptionFilter {
     } else if (exception instanceof QueryFailedError) {
       statusCode = HttpStatus.BAD_REQUEST
       responseBody = {
-        statusCode: statusCode,
-        message: exception.message,
+        // statusCode: statusCode,
+        // message: exception.message,
+        message: 'Invalid data or query error',
       }
     } else if (exception instanceof Error) {
       responseBody = {
-        statusCode: statusCode,
+        // statusCode: statusCode,
         message: exception.stack,
       }
     }
@@ -71,9 +72,7 @@ export class AllExceptionFilter implements ExceptionFilter {
       message = JSON.stringify(exception.getResponse())
     } else if (exception instanceof QueryFailedError) {
       message = exception.stack.toString()
-      console.log('query')
     } else if (exception instanceof Error) {
-      console.log('err')
       message = exception.stack.toString()
       if (message.includes('no such file or directory')) {
         message = 'Not Found'

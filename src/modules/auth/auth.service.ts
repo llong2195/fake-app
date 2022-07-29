@@ -38,7 +38,7 @@ export class AuthService {
     return user
   }
 
-  async login(request: LoginRequestDto): Promise<string> {
+  async login(request: LoginRequestDto): Promise<any> {
     const user = await this.userService.findByEmail(request.email)
     if (!user) {
       throw new UnauthorizedException()
@@ -52,7 +52,7 @@ export class AuthService {
       expiresIn: this.configService.get<string>('jwtExpiresIn'),
     })
 
-    return token
+    return { ...user, token }
   }
 
   async sendOtp(forgotPassword: forgotPasswordDto): Promise<any> {
