@@ -20,7 +20,7 @@ import { ServeStaticModule } from '@nestjs/serve-static'
 import { join } from 'path'
 import { BlogLikeModule } from './modules/blog-like/blog-like.module'
 
-console.log(join(__dirname, '../../', '/upload'))
+// console.log(join(__dirname, '../../', '/upload'))
 
 @Module({
   imports: [

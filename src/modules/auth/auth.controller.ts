@@ -6,6 +6,7 @@ import {
   UseGuards,
   UseInterceptors,
   ClassSerializerInterceptor,
+  HttpCode,
 } from '@nestjs/common'
 import { plainToClass } from 'class-transformer'
 import { User } from '../users/entities/user.entity'
@@ -19,6 +20,7 @@ import { LoginRequestDto } from './dto/login-request.dto'
 import { RegisterRequestDto } from './dto/register-request.dto'
 import { forgotPasswordDto } from './dto/forgot-password.dto'
 import { ResetPasswordDto } from './dto/reset-password-dto'
+import { HttpStatus } from '@nestjs/common'
 
 @UseInterceptors(ClassSerializerInterceptor)
 @Controller('v1/auth')
@@ -29,6 +31,7 @@ export class AuthController {
   ) {}
 
   @UseGuards(LocalAuthGuard)
+  @HttpCode(HttpStatus.OK)
   @Post('/login')
   async login(@Body() request: LoginRequestDto): Promise<BaseResponseDto<any>> {
     const data = await this.authService.login(request)
@@ -44,6 +47,7 @@ export class AuthController {
     return new BaseResponseDto<User>('Success', plainToClass(User, user))
   }
 
+  @HttpCode(HttpStatus.OK)
   @Post('/register')
   async register(
     @Body() registerRequestDto: RegisterRequestDto,
@@ -53,14 +57,19 @@ export class AuthController {
     return new BaseResponseDto<User>('Success', plainToClass(User, user))
   }
 
+  @HttpCode(HttpStatus.OK)
   @Post('/forgot-password')
   async forgotPassword(
     @Body() forgotPassword: forgotPasswordDto,
   ): Promise<BaseResponseDto<any>> {
     this.authService.sendOtp(forgotPassword)
-    return new BaseResponseDto<any>('Success', null)
+    return new BaseResponseDto<any>(
+      'Success',
+      'If your email address exists in our database, you will receive a OTP recovery at your email address in a few minutes',
+    )
   }
 
+  @HttpCode(HttpStatus.OK)
   @Post('/reset-password')
   async verifyOtp(
     @Body() resetPasswordDto: ResetPasswordDto,

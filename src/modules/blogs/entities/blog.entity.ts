@@ -5,15 +5,23 @@ import {
   Column,
   ManyToOne,
   JoinColumn,
+  OneToMany,
 } from 'typeorm'
 import { User } from '../../users/entities/user.entity'
 import { UploadFile } from '../../upload-file/entities/upload-file.entity'
 import { BlogStatus } from 'src/constant/blogStatus.enum'
+import { BlogLike } from '../../blog-like/entities/blog-like.entity'
 
 @Entity({ name: 'blogs' })
 export class Blog extends DateAudit {
   @PrimaryGeneratedColumn()
   id: number
+
+  @OneToMany(
+    () => BlogLike,
+    bloglike => bloglike.blogId,
+  )
+  bloglike: BlogLike[]
 
   @Column()
   title: string
@@ -63,6 +71,7 @@ export class Blog extends DateAudit {
     user => user.id,
     {
       onDelete: 'RESTRICT',
+      eager: true,
     },
   )
   @JoinColumn({ name: 'userId' })

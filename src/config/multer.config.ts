@@ -19,8 +19,10 @@ export const multerOptions: MulterOptions = {
   // Check the mimetypes to allow for upload
   // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
   fileFilter: (req: any, file: any, cb: any) => {
-    if (file.mimetype.match(/\/(jpg|jpeg|png|gif)$/)) {
+    if (file.mimetype.match(/\/(jpg|jpeg|png|gif)$/) || file.originalname.match(/\.(jpg|jpeg|png|gif)$/)) {
       // Allow storage of file
+      // console.log("png");
+      
       cb(null, true)
     } else {
       // Reject file

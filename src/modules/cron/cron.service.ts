@@ -16,9 +16,9 @@ export class CronService {
   ) {}
   private readonly logger = new Logger(CronService.name)
 
-  @Interval(100000)
+  @Interval(1000000)
   handleInterval(): void {
-    this.logger.debug('Called every 10 seconds')
+    this.logger.debug('Called every 100 seconds')
     this.schedulerRegistry.getCronJobs().forEach((job, key) => {
       console.log(`${key} - ${job.running}`)
       if (!job.running) {
@@ -56,12 +56,14 @@ export class CronService {
     job.start()
   }
 
-  @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
-  // @Cron(CronExpression.EVERY_10_SECONDS)
+  // @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
+  @Cron("*/1 * * * * *")
   autoAcceptBlog(): void {
-    console.log(`Auto Accept Blog `)
+    // console.log(`Auto Accept Blog `)
     this.blogsService.autoAccept().then(rs => {
-      console.log(`accept : `, rs.affected)
+      if(rs.affected > 0){
+        console.log(`accept : `, rs.affected)
+      }
     })
   }
 }

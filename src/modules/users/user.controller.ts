@@ -4,6 +4,7 @@ import {
   Controller,
   Delete,
   Get,
+  HttpCode,
   NotFoundException,
   Param,
   Patch,
@@ -29,6 +30,7 @@ import { Blog } from '../blogs/entities/blog.entity'
 import { ChangePasswordDto } from './dto/change-password.dto'
 import { AdminCreateUserDto } from './dto/admin-create-user.dto'
 import { AdminUpdateUserDto } from './dto/admin-update-user.dto'
+import { HttpStatus } from '@nestjs/common'
 
 @UseInterceptors(ClassSerializerInterceptor)
 @Controller('v1/users')
@@ -71,17 +73,17 @@ export class UserController {
   @Get('/blog-accept')
   async getBlogsAccepted(
     @AuthUser() authUser: AuthUserDto,
-  ): Promise<BaseResponseDto<PaginationResponse<Blog>>> {
+  ): Promise<BaseResponseDto<Blog[]>> {
     const blogs = await this.userService.findBlogsAccepted(authUser.id)
-    return new BaseResponseDto<PaginationResponse<Blog>>('Success', blogs)
+    return new BaseResponseDto<Blog[]>('Success', blogs)
   }
 
   @Get('/blog-create')
   async getBlogsCreated(
     @AuthUser() authUser: AuthUserDto,
-  ): Promise<BaseResponseDto<PaginationResponse<Blog>>> {
+  ): Promise<BaseResponseDto<Blog[]>> {
     const blogs = await this.userService.findBlogsAccepted(authUser.id)
-    return new BaseResponseDto<PaginationResponse<Blog>>('Success', blogs)
+    return new BaseResponseDto<Blog[]>('Success', blogs)
   }
 
   /////// ADMIN
@@ -114,6 +116,7 @@ export class UserController {
 
   @UseGuards(RolesGuard)
   @Roles(Role.ADMIN)
+  @HttpCode(HttpStatus.OK)
   @Post()
   async create(
     @Body() userData: AdminCreateUserDto,

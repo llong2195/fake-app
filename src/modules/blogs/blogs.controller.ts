@@ -8,6 +8,7 @@ import {
   Delete,
   UseGuards,
   Query,
+  HttpCode,
 } from '@nestjs/common'
 import { JwtAuthGuard } from 'src/modules/auth/guards/jwt-auth.guard'
 import {
@@ -30,6 +31,7 @@ import { DeleteResult } from 'typeorm'
 import { RolesGuard } from '../auth/guards/role.guard'
 import { Comment } from '../comment/entities/comment.entity'
 import { CreateBlogLikeDto } from '../blog-like/dto/create-blog-like.dto'
+import { HttpStatus } from '@nestjs/common'
 
 @Controller('v1/blogs')
 @UseGuards(JwtAuthGuard)
@@ -40,6 +42,7 @@ export class BlogsController {
     private readonly commentService: CommentService,
   ) {}
 
+  @HttpCode(HttpStatus.OK)
   @Post()
   async create(
     @AuthUser() authUser: AuthUserDto,
@@ -53,25 +56,28 @@ export class BlogsController {
   @Get()
   async index(
     @Query() query: PaginationQueryDto,
-  ): Promise<BaseResponseDto<PaginationResponse<Blog[]>>> {
-    const blogs = await this.blogsService.findAll(query)
-    return new BaseResponseDto<PaginationResponse<Blog[]>>('Success', blogs)
+    @AuthUser() authUser: AuthUserDto,
+  ): Promise<BaseResponseDto<Blog[]>> {
+    const blogs = await this.blogsService.findAll(authUser.id, query)
+    return new BaseResponseDto<Blog[]>('Success', blogs)
   }
 
   @Get('/inactive')
   async findAll(
     @Query() query: PaginationQueryDto,
-  ): Promise<BaseResponseDto<PaginationResponse<Blog[]>>> {
-    const blogs = await this.blogsService.getInactiveBlogs(query)
-    return new BaseResponseDto<PaginationResponse<Blog[]>>('Success', blogs)
+    @AuthUser() authUser: AuthUserDto,
+  ): Promise<BaseResponseDto<Blog[]>> {
+    const blogs = await this.blogsService.getInactiveBlogs(authUser.id, query)
+    return new BaseResponseDto<Blog[]>('Success', blogs)
   }
 
   @Get('/hot')
   async findBlogHot(
     @Query() query: PaginationQueryDto,
-  ): Promise<BaseResponseDto<PaginationResponse<Blog[]>>> {
-    const blogs = await this.blogsService.getBlogsHot(query)
-    return new BaseResponseDto<PaginationResponse<Blog[]>>('Success', blogs)
+    @AuthUser() authUser: AuthUserDto,
+  ): Promise<BaseResponseDto<Blog[]>> {
+    const blogs = await this.blogsService.getBlogsHot(authUser.id, query)
+    return new BaseResponseDto<Blog[]>('Success', blogs)
   }
 
   @Get(':id')
@@ -91,19 +97,17 @@ export class BlogsController {
     )
   }
 
+  @HttpCode(HttpStatus.OK)
   @Post(':id/like')
   async like(
     @Param('id') id: EntityId,
     @AuthUser() authUser: AuthUserDto,
-  ): Promise<BaseResponseDto<Blog | DeleteResult>> {
+  ): Promise<BaseResponseDto<{ like: boolean }>> {
     const createBlogLikeDto = new CreateBlogLikeDto()
     createBlogLikeDto.blogId = <number>id
     createBlogLikeDto.userId = authUser.id
-    const blog = await this.blogsService.like(createBlogLikeDto)
-    return new BaseResponseDto<Blog | DeleteResult>(
-      'Success',
-      plainToClass(Blog, blog),
-    )
+    const result = await this.blogsService.like(createBlogLikeDto)
+    return new BaseResponseDto<{ like: boolean }>('Success', result)
   }
 
   @Patch(':id')
@@ -116,6 +120,7 @@ export class BlogsController {
   }
 
   @Roles(Role.ADMIN)
+  @HttpCode(HttpStatus.OK)
   @Post(':id/setPublic')
   async setPublic(@Param('id') id: number): Promise<BaseResponseDto<Blog>> {
     const blog = await this.blogsService.setPublic(id)
@@ -123,6 +128,7 @@ export class BlogsController {
   }
 
   @Roles(Role.ADMIN)
+  @HttpCode(HttpStatus.OK)
   @Post(':id/setPrivate')
   async setPrivate(@Param('id') id: number): Promise<BaseResponseDto<Blog>> {
     const blog = await this.blogsService.setPrivate(id)

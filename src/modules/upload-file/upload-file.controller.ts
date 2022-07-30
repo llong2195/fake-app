@@ -8,6 +8,7 @@ import {
   UseInterceptors,
   UploadedFile,
   Req,
+  HttpCode,
 } from '@nestjs/common'
 import { UploadFileService } from './upload-file.service'
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard'
@@ -22,6 +23,7 @@ import { AuthUser } from 'src/decorators/auth.user.decorator'
 import { Request } from 'express'
 import { DeleteResult } from 'typeorm/index'
 import { RolesGuard } from '../auth/guards/role.guard'
+import { HttpStatus } from '@nestjs/common'
 
 @Controller('v1/upload-file')
 export class UploadFileController {
@@ -29,13 +31,14 @@ export class UploadFileController {
 
   @UseGuards(JwtAuthGuard)
   @UseInterceptors(FileInterceptor('file', multerOptions))
+  @HttpCode(HttpStatus.OK)
   @Post()
   async create(
     @AuthUser() authUser: AuthUserDto,
     @UploadedFile() file: Express.Multer.File,
     @Req() req: Request,
   ): Promise<BaseResponseDto<UploadFile>> {
-    console.log(`${req.protocol}://${req.get('Host')}`)
+    // console.log(`${req.protocol}://${req.get('Host')}`)
     const uploadfile = await this.uploadFileService.uploadFile(
       authUser.id,
       file,

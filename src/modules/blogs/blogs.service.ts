@@ -10,7 +10,6 @@ import { BlogStatus } from 'src/constant/blogStatus.enum'
 import { PaginationQueryDto, PaginationResponse } from 'src/base/base.dto'
 import { EntityId } from 'typeorm/repository/EntityId'
 import { UpdateBlogDto } from './dto/update-blog.dto'
-import { abort } from 'process'
 import { BlogLikeService } from '../blog-like/blog-like.service'
 import { CreateBlogLikeDto } from '../blog-like/dto/create-blog-like.dto'
 import { BlogLike } from '../blog-like/entities/blog-like.entity'
@@ -26,18 +25,17 @@ export class BlogsService extends BaseService<Blog, BlogRepository> {
     super(repository, logger)
   }
 
-  async like(
-    createBlogLikeDto: CreateBlogLikeDto,
-  ): Promise<BlogLike | DeleteResult> {
+  async like(createBlogLikeDto: CreateBlogLikeDto): Promise<{ like: boolean }> {
     const exist = await this.findById(createBlogLikeDto.blogId)
     if (exist) {
       const blogLike = await this.blogLikeService.like(createBlogLikeDto)
       if (blogLike instanceof BlogLike) {
         this.updatenumLike(createBlogLikeDto.blogId, true)
+        return { like: true }
       } else if (blogLike instanceof DeleteResult) {
         this.updatenumLike(createBlogLikeDto.blogId, false)
+        return { like: false }
       }
-      return blogLike
     } else {
       throw new HttpException(
         `Not Found BlogId: ${createBlogLikeDto.blogId}`,
@@ -65,8 +63,9 @@ export class BlogsService extends BaseService<Blog, BlogRepository> {
       }
     }
 
-    const blog = this.store(createBlog)
-    return blog
+    const blog = await this.store(createBlog)
+
+    return await this.findById(blog.id)
   }
 
   async upgrade(
@@ -140,12 +139,20 @@ export class BlogsService extends BaseService<Blog, BlogRepository> {
     return exist
   }
 
-  async findAll(query: PaginationQueryDto): Promise<PaginationResponse<any>> {
-    const { limit = 5, page = 0, keyword, id, sort } = query
-    console.log(query)
+  async findAll(userId: EntityId, query: PaginationQueryDto): Promise<Blog[]> {
+    const { limit = 20, page = 0, keyword, id, sort } = query
+    // console.log(query)
 
     const qb = this.repository.createQueryBuilder('blogs')
     qb.leftJoinAndSelect('blogs.media', 'm')
+    qb.leftJoinAndSelect('blogs.user', 'u')
+    qb.leftJoinAndMapMany(
+      'blogs.liked',
+      BlogLike,
+      'bloglike',
+      'blogs.id = bloglike.blogId and bloglike.userId = :userId',
+      { userId },
+    )
     if (id) {
       console.log(id)
 
@@ -162,22 +169,28 @@ export class BlogsService extends BaseService<Blog, BlogRepository> {
 
     const [blogs, total] = await qb.getManyAndCount()
     // console.log(qb.getQuery())
-    return new PaginationResponse(blogs, total)
+    return blogs
   }
 
   async getInactiveBlogs(
+    userId: EntityId,
     query: PaginationQueryDto,
-  ): Promise<PaginationResponse<any>> {
-    const { limit = 5, page = 0, keyword, id, sort } = query
-    console.log(query)
+  ): Promise<Blog[]> {
+    const { limit = 20, page = 0, keyword, id, sort } = query
+    // console.log(query)
 
     const qb = this.repository.createQueryBuilder('blogs')
     qb.leftJoinAndSelect('blogs.media', 'm')
-    if (id) {
-      console.log(id)
-
-      qb.andWhere('blogs.id = :id', { id: id })
-    }
+    qb.leftJoinAndSelect('blogs.user', 'u')
+    // check like
+    qb.leftJoinAndMapMany(
+      'blogs.liked',
+      BlogLike,
+      'bloglike',
+      'blogs.id = bloglike.blogId and bloglike.userId = :userId',
+      { userId },
+    )
+    
     if (keyword) {
       qb.andWhere('blogs.title LIKE :title', { title: `%${keyword}%` })
       qb.andWhere('blogs.content LIKE :content', { content: `%${keyword}%` })
@@ -187,21 +200,33 @@ export class BlogsService extends BaseService<Blog, BlogRepository> {
     qb.skip(limit * page)
       .take(limit)
       .orderBy(sort?.by, sort?.direction)
+      .addOrderBy('blogs.createdAt', 'DESC')
 
     const [blogs, total] = await qb.getManyAndCount()
     // console.log(qb.getQuery())
-    return new PaginationResponse(blogs, total)
+    return blogs
   }
+
   async getBlogsHot(
+    userId: EntityId,
     query: PaginationQueryDto,
-  ): Promise<PaginationResponse<any>> {
-    const { limit = 5, page = 0, keyword, id, sort } = query
-    console.log(query)
+  ): Promise<Blog[]> {
+    const { limit = 20, page = 0, keyword, id, sort } = query
+    // console.log(query)
 
     const qb = this.repository.createQueryBuilder('blogs')
     qb.leftJoinAndSelect('blogs.media', 'm')
+    qb.leftJoinAndSelect('blogs.user', 'u')
+    // check like
+    qb.leftJoinAndMapMany(
+      'blogs.liked',
+      BlogLike,
+      'bloglike',
+      'blogs.id = bloglike.blogId and bloglike.userId = :userId',
+      { userId },
+    )
     if (id) {
-      console.log(id)
+      // console.log(id)
 
       qb.andWhere('blogs.id = :id', { id: id })
     }
@@ -219,7 +244,7 @@ export class BlogsService extends BaseService<Blog, BlogRepository> {
 
     const [blogs, total] = await qb.getManyAndCount()
     // console.log(qb.getQuery())
-    return new PaginationResponse(blogs, total)
+    return blogs
   }
 
   autoAccept(): Promise<UpdateResult> {
@@ -237,10 +262,10 @@ export class BlogsService extends BaseService<Blog, BlogRepository> {
   async findBlogsStatusByuserId(
     userId: EntityId,
     status: BlogStatus,
-  ): Promise<PaginationResponse<Blog>> {
+  ): Promise<Blog[]> {
     const [blogs, total] = await this.repository.findAndCount({
       where: { userId: userId, status: status },
     })
-    return new PaginationResponse(blogs, total)
+    return blogs
   }
 }

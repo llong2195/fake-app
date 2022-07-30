@@ -67,11 +67,11 @@ export class UserService extends BaseService<User, UserRepository> {
     return this.repository.getInactiveUsers()
   }
 
-  findBlogsAccepted(userId: EntityId): Promise<PaginationResponse<Blog>> {
+  findBlogsAccepted(userId: EntityId): Promise<Blog[]> {
     return this.blogsService.findBlogsStatusByuserId(userId, BlogStatus.APPROVE)
   }
 
-  findBlogsCreated(userId: EntityId): Promise<PaginationResponse<Blog>> {
+  findBlogsCreated(userId: EntityId): Promise<Blog[]> {
     return this.blogsService.findBlogsStatusByuserId(userId, BlogStatus.CANCEL)
   }
 
@@ -104,8 +104,8 @@ export class UserService extends BaseService<User, UserRepository> {
     const user = await this.repository.findOne({
       where: { OTP: otp, email: email },
     })
-    console.log(user)
-    console.log(otp)
+    // console.log(user)
+    // console.log(otp)
 
     return user
   }

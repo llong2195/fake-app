@@ -4,6 +4,7 @@ import {
   Controller,
   Delete,
   Get,
+  HttpCode,
   Param,
   Patch,
   Post,
@@ -23,6 +24,7 @@ import { Comment } from './entities/comment.entity'
 import { RolesGuard } from '../auth/guards/role.guard'
 import { Roles } from '../auth/decorator/role.decorator'
 import { Role } from 'src/constant/role.enum'
+import { HttpStatus } from '@nestjs/common'
 
 @Controller('v1/comment')
 @UseGuards(JwtAuthGuard)
@@ -31,6 +33,7 @@ export class CommentController {
   constructor(private readonly commentService: CommentService) {}
 
   @Post()
+  @HttpCode(HttpStatus.OK)
   async create(
     @Body() createCommentDto: CreateCommentDto,
     @AuthUser() user: AuthUserDto,

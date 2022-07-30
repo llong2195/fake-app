@@ -25,7 +25,7 @@ export class UploadFileService extends BaseService<
     }
     const createUploadFile = new UploadFile(null)
     createUploadFile.originUrl = `${file.filename}`
-    console.log(file)
+    // console.log(file)
 
     await sharp(file.path)
       .resize({
