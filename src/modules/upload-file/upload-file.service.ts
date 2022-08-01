@@ -24,7 +24,7 @@ export class UploadFileService extends BaseService<
       throw new HttpException(`file is not null`, HttpStatus.BAD_REQUEST)
     }
     const createUploadFile = new UploadFile(null)
-    createUploadFile.originUrl = `${file.filename}`
+    createUploadFile.originUrl = `image/${file.filename}`
     // console.log(file)
 
     await sharp(file.path)
@@ -32,9 +32,9 @@ export class UploadFileService extends BaseService<
         width: 317,
         height: 262,
       })
-      .toFile('upload/' + '262x317-' + file.filename)
+      .toFile('public/image/' + '262x317-' + file.filename)
       .then(() => {
-        createUploadFile.thumbUrl = '262x317-' + file.filename
+        createUploadFile.thumbUrl = 'image/262x317-' + file.filename
       })
       .catch(err => {
         console.log(err)

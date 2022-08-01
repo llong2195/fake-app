@@ -190,7 +190,7 @@ export class BlogsService extends BaseService<Blog, BlogRepository> {
       'blogs.id = bloglike.blogId and bloglike.userId = :userId',
       { userId },
     )
-    
+
     if (keyword) {
       qb.andWhere('blogs.title LIKE :title', { title: `%${keyword}%` })
       qb.andWhere('blogs.content LIKE :content', { content: `%${keyword}%` })

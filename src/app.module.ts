@@ -19,13 +19,15 @@ import { CronModule } from './modules/cron/cron.module'
 import { ServeStaticModule } from '@nestjs/serve-static'
 import { join } from 'path'
 import { BlogLikeModule } from './modules/blog-like/blog-like.module'
+import { AppController } from './app.controller'
+import { AppService } from './app.service'
 
 // console.log(join(__dirname, '../../', '/upload'))
 
 @Module({
   imports: [
     ServeStaticModule.forRoot({
-      rootPath: join(__dirname, '../../', '/upload'),
+      rootPath: join(__dirname, '../../', '/public'),
       serveRoot: '/',
       exclude: ['/api/*', '/auth/*'],
     }),
@@ -44,12 +46,13 @@ import { BlogLikeModule } from './modules/blog-like/blog-like.module'
     CronModule,
     BlogLikeModule,
   ],
-  controllers: [],
+  controllers: [AppController],
   providers: [
     {
       provide: APP_FILTER,
       useClass: AllExceptionFilter,
     },
+    AppService,
   ],
 })
 export class AppModule {}

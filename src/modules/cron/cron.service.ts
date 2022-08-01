@@ -56,12 +56,12 @@ export class CronService {
     job.start()
   }
 
-  // @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
-  @Cron("*/1 * * * * *")
+  @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
+  // @Cron('*/1 * * * * *')
   autoAcceptBlog(): void {
     // console.log(`Auto Accept Blog `)
     this.blogsService.autoAccept().then(rs => {
-      if(rs.affected > 0){
+      if (rs.affected > 0) {
         console.log(`accept : `, rs.affected)
       }
     })
