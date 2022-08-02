@@ -36,4 +36,4 @@ lerna-debug.log*
 .env
 /.mysql-data
 /upload
-/public
+/public/image
