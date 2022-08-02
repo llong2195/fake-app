@@ -4,7 +4,7 @@ import * as fs from 'fs'
 
 @Injectable()
 export class AppService {
-  updateReview(): boolean {
+  updateReview(id: number): number {
     if (!existsSync('public')) {
       mkdirSync('public')
     }
@@ -13,10 +13,10 @@ export class AppService {
     }
     if (!existsSync('public/config/config.json')) {
       const data = {
-        review: false,
+        review: id ?? 1,
       }
       fs.writeFileSync('public/config/config.json', JSON.stringify(data))
-      return false
+      return id ?? 1
     }
 
     const data = fs.readFileSync('public/config/config.json', {
@@ -25,11 +25,12 @@ export class AppService {
 
     const config = JSON.parse(data)
 
-    config.review = !config?.review
+    config.review = id
     fs.writeFileSync('public/config/config.json', JSON.stringify(config))
-    return config?.review ? config?.review : false
+    return config?.review ? config?.review : 1
   }
-  getReview(): boolean {
+
+  getReview(): number {
     if (!existsSync('public')) {
       mkdirSync('public')
     }
@@ -38,10 +39,10 @@ export class AppService {
     }
     if (!existsSync('public/config/config.json')) {
       const data = {
-        review: false,
+        review: 1,
       }
       fs.writeFileSync('public/config/config.json', JSON.stringify(data))
-      return false
+      return 1
     }
 
     const data = fs.readFileSync('public/config/config.json', {
@@ -50,6 +51,6 @@ export class AppService {
     const config = JSON.parse(data)
     // console.log(config)
 
-    return config?.review ? config?.review : false
+    return config?.review ? config?.review : 1
   }
 }
