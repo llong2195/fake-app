@@ -43,6 +43,9 @@ export class AuthService {
     if (!user) {
       throw new UnauthorizedException()
     }
+    if (user.deleted) {
+      throw new HttpException('Tài Khoản Đã Bị Xoá', HttpStatus.BAD_REQUEST)
+    }
     const payload = {
       email: user.email,
       id: user.id,

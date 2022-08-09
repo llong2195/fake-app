@@ -24,4 +24,20 @@ export class AppController {
       this.appService.updateReview(+id),
     )
   }
+
+  @Get('/view')
+  async getView(): Promise<BaseResponseDto<string>> {
+    return new BaseResponseDto<string>('Success', this.appService.getView())
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @UseGuards(RolesGuard)
+  @Roles(Role.ADMIN)
+  @Put('/view')
+  async updateView(@Body('url') url: string): Promise<BaseResponseDto<string>> {
+    return new BaseResponseDto<string>(
+      'Success',
+      this.appService.updateView(url),
+    )
+  }
 }

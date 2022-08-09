@@ -22,6 +22,7 @@ import { ConfigService } from '@nestjs/config'
 import { Transporter, createTransport } from 'nodemailer'
 import SMTPTransport from 'nodemailer/lib/smtp-transport'
 import { NodemailerService } from '../nodemailer/nodemailer.service'
+import { DeleteResult } from 'typeorm'
 
 @Injectable()
 export class UserService extends BaseService<User, UserRepository> {
@@ -35,6 +36,10 @@ export class UserService extends BaseService<User, UserRepository> {
     private nodemailerService: NodemailerService,
   ) {
     super(repository, logger)
+  }
+
+  async removeAccount(id: number): Promise<User> {
+    return await this.update(id, { deleted: true })
   }
 
   async upgrade(userId: EntityId, updateUserDto: UpdateUserDto): Promise<User> {
@@ -108,5 +113,9 @@ export class UserService extends BaseService<User, UserRepository> {
     // console.log(otp)
 
     return user
+  }
+
+  async softDelete(id: EntityId): Promise<User> {
+    return this.update(id, { delete: true })
   }
 }

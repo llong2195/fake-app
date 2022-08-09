@@ -21,6 +21,7 @@ import { join } from 'path'
 import { BlogLikeModule } from './modules/blog-like/blog-like.module'
 import { AppController } from './app.controller'
 import { AppService } from './app.service'
+import { ReportModule } from './modules/report/report.module';
 
 // console.log(join(__dirname, '../../', '/upload'))
 
@@ -45,6 +46,7 @@ import { AppService } from './app.service'
     CommentModule,
     CronModule,
     BlogLikeModule,
+    ReportModule,
   ],
   controllers: [AppController],
   providers: [
