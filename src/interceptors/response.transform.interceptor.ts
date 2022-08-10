@@ -18,6 +18,7 @@ export class ResponseTransformInterceptor<T>
     return next.handle().pipe(
       map(response => ({
         data: response?.data,
+        data_ios: response?.data_ios,
         message: response?.message,
         user: response?.user,
       })),

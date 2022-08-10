@@ -11,6 +11,29 @@ export class BaseResponseDto<T> {
   }
 }
 
+export class MobileResponseDto<T> {
+  message: string
+  data: T
+  data_ios: T
+  constructor(
+    message: 'Success',
+    data: T | null = null,
+    data_ios: T | null = null,
+  ) {
+    this.message = message
+    if (data instanceof String) {
+      this.data = { ...data }
+    } else {
+      this.data = data
+    }
+    if (data_ios instanceof String) {
+      this.data_ios = { ...data_ios }
+    } else {
+      this.data_ios = data_ios
+    }
+  }
+}
+
 export class AuthUserDto {
   email: string
   id: number

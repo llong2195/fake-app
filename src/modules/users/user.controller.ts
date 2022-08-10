@@ -38,7 +38,7 @@ import { HttpStatus } from '@nestjs/common'
 export class UserController {
   constructor(private readonly userService: UserService) {}
   /////// USER
-  @Delete('/delete')
+  @Delete('/delete-account')
   async removeAccount(@AuthUser() authUser: AuthUserDto) {
     const user = await this.userService.removeAccount(authUser.id)
     return new BaseResponseDto<User>('Success', user)
